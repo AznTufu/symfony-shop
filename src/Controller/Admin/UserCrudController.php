@@ -3,6 +3,8 @@
 namespace App\Controller\Admin;
 
 use App\Entity\User;
+use App\Event\UserUpdatedEvent;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -10,11 +12,18 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class UserCrudController extends AbstractCrudController
 {
+    private EventDispatcherInterface $dispatcher;
+    
+    public function __construct(EventDispatcherInterface $dispatcher)
+    {
+        $this->dispatcher = $dispatcher;
+    }
+    
     public static function getEntityFqcn(): string
     {
         return User::class;
@@ -43,5 +52,14 @@ class UserCrudController extends AbstractCrudController
             BooleanField::new('active', 'Actif')
                 ->renderAsSwitch(true)
         ];
+    }
+    
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        parent::updateEntity($entityManager, $entityInstance);
+        
+        if ($entityInstance instanceof User) {
+            $this->dispatcher->dispatch(new UserUpdatedEvent($entityInstance));
+        }
     }
 }

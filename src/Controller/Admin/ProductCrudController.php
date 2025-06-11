@@ -3,21 +3,27 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Product;
+use App\Event\ProductCreatedEvent;
+use App\Event\ProductDeletedEvent;
+use App\Event\ProductUpdatedEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class ProductCrudController extends AbstractCrudController
 {
     private Security $security;
+    private EventDispatcherInterface $dispatcher;
     
-    public function __construct(Security $security)
+    public function __construct(Security $security, EventDispatcherInterface $dispatcher)
     {
         $this->security = $security;
+        $this->dispatcher = $dispatcher;
     }
     
     public static function getEntityFqcn(): string
@@ -59,5 +65,27 @@ class ProductCrudController extends AbstractCrudController
         }
 
         parent::persistEntity($entityManager, $entityInstance);
+
+        if ($entityInstance instanceof Product) {
+            $this->dispatcher->dispatch(new ProductCreatedEvent($entityInstance));
+        }
+    }
+
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        parent::updateEntity($entityManager, $entityInstance);
+        
+        if ($entityInstance instanceof Product) {
+            $this->dispatcher->dispatch(new ProductUpdatedEvent($entityInstance));
+        }
+    }
+    
+    public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        if ($entityInstance instanceof Product) {
+            $this->dispatcher->dispatch(new ProductDeletedEvent($entityInstance));
+        }
+        
+        parent::deleteEntity($entityManager, $entityInstance);
     }
 }
