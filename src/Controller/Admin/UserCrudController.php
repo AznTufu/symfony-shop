@@ -12,6 +12,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -49,6 +50,7 @@ class UserCrudController extends AbstractCrudController
             TextField::new('firstname')->hideOnForm(),
             TextField::new('email')->hideOnForm(),
             ArrayField::new('roles')->hideOnForm(),
+            NumberField::new('points')->hideOnForm(),
             BooleanField::new('active', 'Actif')
                 ->renderAsSwitch(true)
         ];

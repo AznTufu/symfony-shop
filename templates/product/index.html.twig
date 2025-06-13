@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des produits{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="mb-4">Liste des produits</h1>
+    
+    <div class="row">
+        {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ product.price }} points</h6>
+                        <p class="card-text">Catégorie: {{ product.category }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ path('product_detail', {'id': product.id}) }}" class="btn btn-primary">Voir détails</a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Aucun produit disponible pour le moment.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
